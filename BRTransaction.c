@@ -347,8 +347,8 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
     assert(buf != NULL || bufLen == 0);
     if (! buf) return NULL;
     
-    int isSigned = 1;
-    size_t i, off = 0, sLen = 0, len = 0;
+    int isSigned = 1, witnessFlag = 0;
+    size_t i, j, off = 0, sLen = 0, len = 0, count;
     BRTransaction *tx = BRTransactionNew();
     BRTxInput *input;
     BRTxOutput *output;
@@ -357,6 +357,13 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
     off += sizeof(uint32_t);
     tx->inCount = (size_t)BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
     off += len;
+    if (tx->inCount == 0 && off + 1 <= bufLen) witnessFlag = buf[off++];
+
+    if (witnessFlag) {
+        tx->inCount = BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
+        off += len;
+    }
+
     array_set_count(tx->inputs, tx->inCount);
     
     for (i = 0; off <= bufLen && i < tx->inCount; i++) {
@@ -375,7 +382,7 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
         else if (off + sLen <= bufLen) BRTxInputSetSignature(input, &buf[off], sLen);
         
         off += sLen;
-        BRTxInputSetWitness(input, &buf[off], 0); // set witness to empty byte array
+        if (! witnessFlag) BRTxInputSetWitness(input, &buf[off], 0); // set witness to empty byte array
         input->sequence = (off + sizeof(uint32_t) <= bufLen) ? UInt32GetLE(&buf[off]) : 0;
         off += sizeof(uint32_t);
     }
@@ -391,6 +398,20 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
         sLen = (size_t)BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
         off += len;
         if (off + sLen <= bufLen) BRTxOutputSetScript(output, &buf[off], sLen);
+        off += sLen;
+    }
+    
+    for (i = 0; witnessFlag && off <= bufLen && i < tx->inCount; i++) {
+        input = &tx->inputs[i];
+        count = BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
+        off += len;
+        
+        for (j = 0, sLen = 0; j < count; j++) {
+            sLen += BRVarInt(&buf[off + sLen], (off + sLen <= bufLen ? bufLen - (off + sLen) : 0), &len);
+            sLen += len;
+        }
+        
+        if (off + sLen <= bufLen) BRTxInputSetWitness(input, &buf[off], sLen);
         off += sLen;
     }
     
@@ -484,7 +505,7 @@ size_t BRTransactionSize(const BRTransaction *tx)
         
         if (input->signature && input->witness) {
             size += sizeof(UInt256) + sizeof(uint32_t) + BRVarIntSize(input->sigLen) + input->sigLen + sizeof(uint32_t);
-            witSize += tx->inputs[i].witLen;
+            witSize += input->witLen;
         }
         else if (input->script && input->scriptLen > 0 && input->script[0] == OP_0) {
             witSize += TX_INPUT_SIZE;
