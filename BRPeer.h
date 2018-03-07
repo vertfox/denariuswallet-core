@@ -52,7 +52,7 @@
 extern "C" {
 #endif
 
-#if BITCOIN_TESTNET
+#if DENARIUS_TESTNET
 #define STANDARD_PORT 18333
 #else
 #define STANDARD_PORT 8333

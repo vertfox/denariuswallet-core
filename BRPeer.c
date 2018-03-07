@@ -43,7 +43,7 @@
 #include <netinet/in.h>	
 #include <arpa/inet.h>
 
-#if BITCOIN_TESTNET
+#if DENARIUS_TESTNET
 #define MAGIC_NUMBER 0x0709110b
 #else
 #define MAGIC_NUMBER 0xd9b4bef9

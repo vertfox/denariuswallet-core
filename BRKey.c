@@ -30,8 +30,8 @@
 #include <assert.h>
 #include <pthread.h>
 
-#define BITCOIN_PRIVKEY      128
-#define BITCOIN_PRIVKEY_TEST 239
+#define DENARIUS_PRIVKEY      128
+#define DENARIUS_PRIVKEY_TEST 239
 
 #if __BIG_ENDIAN__ || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) ||\
     __ARMEB__ || __THUMBEB__ || __AARCH64EB__ || __MIPSEB__
@@ -130,10 +130,10 @@ int BRPrivKeyIsValid(const char *privKey)
     strLen = strlen(privKey);
     
     if (dataLen == 33 || dataLen == 34) { // wallet import format: https://en.bitcoin.it/wiki/Wallet_import_format
-#if BITCOIN_TESTNET
-        r = (data[0] == BITCOIN_PRIVKEY_TEST);
+#if DENARIUS_TESTNET
+        r = (data[0] == DENARIUS_PRIVKEY_TEST);
 #else
-        r = (data[0] == BITCOIN_PRIVKEY);
+        r = (data[0] == DENARIUS_PRIVKEY);
 #endif
     }
     else if ((strLen == 30 || strLen == 22) && privKey[0] == 'S') { // mini private key format
@@ -169,11 +169,11 @@ int BRKeySetSecret(BRKey *key, const UInt256 *secret, int compressed)
 int BRKeySetPrivKey(BRKey *key, const char *privKey)
 {
     size_t len = strlen(privKey);
-    uint8_t data[34], version = BITCOIN_PRIVKEY;
+    uint8_t data[34], version = DENARIUS_PRIVKEY;
     int r = 0;
     
-#if BITCOIN_TESTNET
-    version = BITCOIN_PRIVKEY_TEST;
+#if DENARIUS_TESTNET
+    version = DENARIUS_PRIVKEY_TEST;
 #endif
 
     assert(key != NULL);
@@ -232,9 +232,9 @@ size_t BRKeyPrivKey(const BRKey *key, char *privKey, size_t pkLen)
     assert(key != NULL);
     
     if (secp256k1_ec_seckey_verify(_ctx, key->secret.u8)) {
-        data[0] = BITCOIN_PRIVKEY;
-#if BITCOIN_TESTNET
-        data[0] = BITCOIN_PRIVKEY_TEST;
+        data[0] = DENARIUS_PRIVKEY;
+#if DENARIUS_TESTNET
+        data[0] = DENARIUS_PRIVKEY_TEST;
 #endif
         
         UInt256Set(&data[1], key->secret);
@@ -291,9 +291,9 @@ size_t BRKeyAddress(BRKey *key, char *addr, size_t addrLen)
     assert(key != NULL);
     
     hash = BRKeyHash160(key);
-    data[0] = BITCOIN_PUBKEY_ADDRESS;
-#if BITCOIN_TESTNET
-    data[0] = BITCOIN_PUBKEY_ADDRESS_TEST;
+    data[0] = DENARIUS_PUBKEY_ADDRESS;
+#if DENARIUS_TESTNET
+    data[0] = DENARIUS_PUBKEY_ADDRESS_TEST;
 #endif
     UInt160Set(&data[1], hash);
 
