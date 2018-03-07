@@ -977,7 +977,7 @@ int BRKeyTests()
     BRKeySetPrivKey(&key, "S6c56bnXQiBjk9mqSYE7ykVQ7NzrRy");
     BRKeyAddress(&key, addr.s, sizeof(addr));
     printf("privKey:S6c56bnXQiBjk9mqSYE7ykVQ7NzrRy = %s\n", addr.s);
-#if BITCOIN_TESTNET
+#if DENARIUS_TESTNET
     if (! BRAddressEq(&addr, "ms8fwvXzrCoyatnGFRaLbepSqwGRxVJQF1"))
         r = 0, fprintf(stderr, "***FAILED*** %s: BRKeySetPrivKey() test 1\n", __func__);
 #else
@@ -992,7 +992,7 @@ int BRKeyTests()
     BRKeySetPrivKey(&key, "SzavMBLoXU6kDrqtUVmffv");
     BRKeyAddress(&key, addr.s, sizeof(addr));
     printf("privKey:SzavMBLoXU6kDrqtUVmffv = %s\n", addr.s);
-#if BITCOIN_TESTNET
+#if DENARIUS_TESTNET
     if (! BRAddressEq(&addr, "mrhzp5mstA4Midx85EeCjuaUAAGANMFmRP"))
         r = 0, fprintf(stderr, "***FAILED*** %s: BRKeySetPrivKey() test 2\n", __func__);
 #else
@@ -1000,7 +1000,7 @@ int BRKeyTests()
         r = 0, fprintf(stderr, "***FAILED*** %s: BRKeySetPrivKey() test 2\n", __func__);
 #endif
 
-#if ! BITCOIN_TESTNET
+#if ! DENARIUS_TESTNET
     // uncompressed private key
     if (! BRPrivKeyIsValid("5Kb8kLf9zgWQnogidDA76MzPL6TsZZY36hWXMssSzNydYXYB9KF"))
         r = 0, fprintf(stderr, "***FAILED*** %s: BRPrivKeyIsValid() test 3\n", __func__);
@@ -2489,7 +2489,7 @@ int BRRunTests()
     return (fail == 0);
 }
 
-#ifndef BITCOIN_TEST_NO_MAIN
+#ifndef DENARIUS_TEST_NO_MAIN
 void syncStarted(void *info)
 {
     printf("sync started\n");
